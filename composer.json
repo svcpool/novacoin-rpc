@@ -2,7 +2,7 @@
     "name": "svcpool/novacoin-rpc-connector",
     "description": "Php library to connect novacoin rpc",
     "type": "library",
-    "keywords": ["yii2","extension"],
+    "keywords": ["library", "novacoin"],
     "license": "MIT",
     "authors": [
         {
