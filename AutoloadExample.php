@@ -1,6 +1,6 @@
 <?php
 
-namespace Svcpool;
+namespace Svcpool\NovacoinRpc;
 
 /**
  * This is just an example.
