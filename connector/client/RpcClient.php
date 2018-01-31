@@ -20,6 +20,9 @@ use liamwli\PHPBitcoin\BitCoin;
  * @method gettransaction($txid)
  * @method getaccount($address)
  * @method listtransactions($account, $count, $from)
+ * @method createrawtransaction($transactions, $addresses)
+ * @method signrawtransaction($hex, $dependTxs, $privateKeys, $signHashType)
+ * @method sendrawtransaction($hex)
  */
 class RpcClient extends BitCoin
 {

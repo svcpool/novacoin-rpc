@@ -3,6 +3,8 @@
 namespace Svcpool\NovacoinRpc\connector;
 
 use Svcpool\NovacoinRpc\connector\client\RpcClient;
+use Svcpool\NovacoinRpc\connector\models\SignTransactionResult;
+use Svcpool\NovacoinRpc\connector\models\UnspentTransaction;
 
 /**
  * Class RpcConnector
@@ -37,9 +39,23 @@ class RpcConnector
         return $this->_client->scaninput(['txid' => $txid]);
     }
 
-    public function listUnspent()
+    /**
+     * @param bool $asArray
+     * @return UnspentTransaction[]
+     * @throws exceptions\RpcClientException
+     */
+    public function listUnspent($asArray = FALSE)
     {
-        return $this->_client->callMethod('listunspent');
+        $data = $this->_client->callMethod('listunspent');
+        if ($asArray) {
+            return $data;
+        }
+        $result = [];
+        foreach ($data as $datum) {
+            $result[] = new UnspentTransaction($datum);
+        }
+
+        return $result;
     }
 
     public function getBalance($account = NULL)
@@ -70,5 +86,31 @@ class RpcConnector
         return $this->_client->listtransactions('*', $count, $offset);
     }
 
+    public function createRawTransaction($transactions, $addresses)
+    {
+        return $this->_client->createrawtransaction($transactions, $addresses);
+    }
 
+    /**
+     * @param $hex
+     * @param null $dependTxs
+     * @param null $privateKeys
+     * @param null $signHashType
+     * @return SignTransactionResult
+     */
+    public function signRawTransaction($hex, $dependTxs = NULL, $privateKeys = NULL, $signHashType = NULL)
+    {
+        $signrawtransaction = $this->_client->signrawtransaction($hex, $dependTxs, $privateKeys, $signHashType);
+
+        return new SignTransactionResult($signrawtransaction);
+    }
+
+    /**
+     * @param $hex
+     * @return string TXid
+     */
+    public function sendRawTranscation($hex)
+    {
+        return $this->_client->sendrawtransaction($hex);
+    }
 }
