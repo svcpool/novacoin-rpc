@@ -113,4 +113,10 @@ class RpcConnector
     {
         return $this->_client->sendrawtransaction($hex);
     }
+
+    public function getBlockByNumber($number)
+    {
+        $getblockbynumber = $this->_client->getblockbynumber($number);
+        return $getblockbynumber;
+    }
 }
