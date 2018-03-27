@@ -6,10 +6,10 @@
  * Time: 16:58
  */
 
-namespace Svcpool\NovacoinRpc\connector\models\blockByNumber;
+namespace Svcpool\NovacoinRpc\connector\models\block;
 
 
-class BlockByNumber
+class RpcBlockModel
 {
     /** @var string */
     public $hash;

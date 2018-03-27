@@ -3,6 +3,7 @@
 namespace Svcpool\NovacoinRpc\connector;
 
 use Svcpool\NovacoinRpc\connector\client\RpcClient;
+use Svcpool\NovacoinRpc\connector\models\block\RpcBlockModel;
 use Svcpool\NovacoinRpc\connector\models\SignTransactionResult;
 use Svcpool\NovacoinRpc\connector\models\UnspentTransaction;
 
@@ -102,7 +103,7 @@ class RpcConnector
     {
         $signrawtransaction = $this->_client->signrawtransaction($hex, $dependTxs, $privateKeys, $signHashType);
 
-        return new SignTransactionResult($signrawtransaction);
+        return $this->prepareObject(new SignTransactionResult(), $signrawtransaction);
     }
 
     /**
@@ -114,9 +115,39 @@ class RpcConnector
         return $this->_client->sendrawtransaction($hex);
     }
 
-    public function getBlockByNumber($number)
+    /**
+     * @param $number
+     * @return RpcBlockModel
+     */
+    public function getBlockByNumber(int $number)
     {
-        $getblockbynumber = $this->_client->getblockbynumber($number);
-        return $getblockbynumber;
+        return $this->prepareObject(new RpcBlockModel(), $this->_client->getblockbynumber($number));
+    }
+
+    /**
+     * @param string $hash
+     * @return RpcBlockModel
+     */
+    public function getBlockByHash(string $hash)
+    {
+        return $this->prepareObject(new RpcBlockModel(), $this->_client->getblock($hash));
+    }
+
+    /**
+     * @return int
+     */
+    public function getBlockCount()
+    {
+        return $this->_client->getblockcount();
+    }
+
+    protected function prepareObject($object, array $vars)
+    {
+        $has = get_object_vars($object);
+        foreach ($has as $name => $oldValue) {
+            $object->$name = isset($vars[$name]) ? $vars[$name] : NULL;
+        }
+
+        return $object;
     }
 }

@@ -23,6 +23,9 @@ use liamwli\PHPBitcoin\BitCoin;
  * @method createrawtransaction($transactions, $addresses)
  * @method signrawtransaction($hex, $dependTxs, $privateKeys, $signHashType)
  * @method sendrawtransaction($hex)
+ * @method getblockbynumber($number)
+ * @method getblock($hash)
+ * @method getblockcount()
  */
 class RpcClient extends BitCoin
 {
