@@ -5,7 +5,12 @@ namespace Svcpool\NovacoinRpc\connector;
 use Svcpool\NovacoinRpc\connector\client\RpcClient;
 use Svcpool\NovacoinRpc\connector\models\block\RpcBlockModel;
 use Svcpool\NovacoinRpc\connector\models\SignTransactionResult;
+use Svcpool\NovacoinRpc\connector\models\transaction\RpcTransactionModel;
+use Svcpool\NovacoinRpc\connector\models\transaction\ScriptPubKey;
+use Svcpool\NovacoinRpc\connector\models\transaction\SingleVOut;
+use Svcpool\NovacoinRpc\connector\models\transaction\VInCoinBase;
 use Svcpool\NovacoinRpc\connector\models\UnspentTransaction;
+use Svcpool\NovacoinRpc\parser\parsers\transaction\TransactionParser;
 
 /**
  * Class RpcConnector
@@ -72,6 +77,11 @@ class RpcConnector
     public function getTransationInfo($txId)
     {
         return $this->_client->gettransaction($txId);
+    }
+
+    public function getTransactionByHash($hash)
+    {
+        return (new TransactionParser($this->_client->gettransaction($hash)))->parse();
     }
 
 
