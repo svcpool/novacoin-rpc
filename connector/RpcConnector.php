@@ -3,8 +3,14 @@
 namespace Svcpool\NovacoinRpc\connector;
 
 use Svcpool\NovacoinRpc\connector\client\RpcClient;
+use Svcpool\NovacoinRpc\connector\models\block\RpcBlockModel;
 use Svcpool\NovacoinRpc\connector\models\SignTransactionResult;
+use Svcpool\NovacoinRpc\connector\models\transaction\RpcTransactionModel;
+use Svcpool\NovacoinRpc\connector\models\transaction\ScriptPubKey;
+use Svcpool\NovacoinRpc\connector\models\transaction\SingleVOut;
+use Svcpool\NovacoinRpc\connector\models\transaction\VInCoinBase;
 use Svcpool\NovacoinRpc\connector\models\UnspentTransaction;
+use Svcpool\NovacoinRpc\parser\parsers\transaction\TransactionParser;
 
 /**
  * Class RpcConnector
@@ -73,6 +79,11 @@ class RpcConnector
         return $this->_client->gettransaction($txId);
     }
 
+    public function getTransactionByHash($hash)
+    {
+        return (new TransactionParser($this->_client->gettransaction($hash)))->parse();
+    }
+
 
     public function createAddress($account = NULL)
     {
@@ -102,7 +113,7 @@ class RpcConnector
     {
         $signrawtransaction = $this->_client->signrawtransaction($hex, $dependTxs, $privateKeys, $signHashType);
 
-        return new SignTransactionResult($signrawtransaction);
+        return $this->prepareObject(new SignTransactionResult(), $signrawtransaction);
     }
 
     /**
@@ -112,5 +123,41 @@ class RpcConnector
     public function sendRawTranscation($hex)
     {
         return $this->_client->sendrawtransaction($hex);
+    }
+
+    /**
+     * @param $number
+     * @return RpcBlockModel
+     */
+    public function getBlockByNumber(int $number)
+    {
+        return $this->prepareObject(new RpcBlockModel(), $this->_client->getblockbynumber($number));
+    }
+
+    /**
+     * @param string $hash
+     * @return RpcBlockModel
+     */
+    public function getBlockByHash(string $hash)
+    {
+        return $this->prepareObject(new RpcBlockModel(), $this->_client->getblock($hash));
+    }
+
+    /**
+     * @return int
+     */
+    public function getBlockCount()
+    {
+        return $this->_client->getblockcount();
+    }
+
+    protected function prepareObject($object, array $vars)
+    {
+        $has = get_object_vars($object);
+        foreach ($has as $name => $oldValue) {
+            $object->$name = isset($vars[$name]) ? $vars[$name] : NULL;
+        }
+
+        return $object;
     }
 }

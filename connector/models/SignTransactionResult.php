@@ -8,9 +8,7 @@
 
 namespace Svcpool\NovacoinRpc\connector\models;
 
-use yii\base\BaseObject;
-
-class SignTransactionResult extends BaseObject
+class SignTransactionResult
 {
     /** @var string */
     public $hex;
