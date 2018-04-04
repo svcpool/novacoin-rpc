@@ -107,6 +107,23 @@ class NovacoinComponent
         return $result;
     }
 
+    /**
+     * @param TransactionsFilter|NULL $filter
+     * @return TransactionResult[]|mixed
+     */
+    public function getTransactionsCount(TransactionsFilter $filter = NULL)
+    {
+        $key = 'NVC_transactions_count_' . ($filter ? $filter->getCacheKey() : 'all');
+        $cache = \Yii::$app->cacheNovacoin;
+        $result = $cache->get($key);
+        if (empty($result)) {
+            $result = (new TransactionListGetter($filter))->getTransactionsCount();
+            $cache->set($key, $result, MINUTE * 7);
+        }
+
+        return (int) $result;
+    }
+
     public function isWatchingAddress($address)
     {
         return in_array($address, WatchAddressConfig::getInstance()->watchingAddresses);
