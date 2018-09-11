@@ -167,7 +167,7 @@ class NovacoinComponent
         $cache = \Yii::$app->cache;
         $cachedPrice = $cache->get($key);
         if (empty($cachedPrice)) {
-            $apiPrice = (double)ArrayHelper::getValue(Json::decode((new Client())->get('https://api.coinmarketcap.com/v1/ticker/novacoin/')->send()->content), '0.price_usd');
+            $apiPrice = (double)ArrayHelper::getValue(Json::decode((new Client())->get('https://api.livecoin.net/exchange/ticker?currencyPair=NVC/USD')->send()->content), 'last');
             $cachedPrice = $apiPrice;
             $cache->set($key, $apiPrice, 60);
         }
