@@ -52,7 +52,7 @@ class NovacoinComponent
         return $addressObject->address;
     }
 
-    public function getUserBalance($user_id, $calculated = FALSE)
+    public function getUserBalance($user_id, $calculated = false)
     {
         $helper = new UserCryptoBalanceHelper();
         $helper->setUserId($user_id);
@@ -65,7 +65,7 @@ class NovacoinComponent
     public function getAddressBalance($address)
     {
         $client = new Client();
-        $result = $client->get('https://api.novaco.in/getbalance/' . $address)->send()->getData();
+        $result = $client->get('https://api.novaco.in/getbalance/'.$address)->send()->getData();
 
         return ArrayHelper::getValue($result, 'outval', 0) / NOVACOIN_API_MULTIPLIER;
     }
@@ -94,9 +94,9 @@ class NovacoinComponent
      * @param TransactionsFilter|NULL $filter
      * @return TransactionResult[]|mixed
      */
-    public function getTransactions(TransactionsFilter $filter = NULL)
+    public function getTransactions(TransactionsFilter $filter = null)
     {
-        $key = 'NVC_transactions_' . ($filter ? $filter->getCacheKey() : 'all');
+        $key = 'NVC_transactions_'.($filter ? $filter->getCacheKey() : 'all');
         $cache = \Yii::$app->cacheNovacoin;
         $result = $cache->get($key);
         if (empty($result)) {
@@ -111,9 +111,9 @@ class NovacoinComponent
      * @param TransactionsFilter|NULL $filter
      * @return TransactionResult[]|mixed
      */
-    public function getTransactionsCount(TransactionsFilter $filter = NULL)
+    public function getTransactionsCount(TransactionsFilter $filter = null)
     {
-        $key = 'NVC_transactions_count_' . ($filter ? $filter->getCacheKey() : 'all');
+        $key = 'NVC_transactions_count_'.($filter ? $filter->getCacheKey() : 'all');
         $cache = \Yii::$app->cacheNovacoin;
         $result = $cache->get($key);
         if (empty($result)) {
@@ -121,7 +121,7 @@ class NovacoinComponent
             $cache->set($key, $result, MINUTE * 7);
         }
 
-        return (int) $result;
+        return (int)$result;
     }
 
     public function isWatchingAddress($address)
@@ -131,7 +131,7 @@ class NovacoinComponent
 
     public function generateTransactionKey($txid, $address)
     {
-        return $txid . '--' . $address;
+        return $txid.'--'.$address;
     }
 
 
@@ -143,7 +143,10 @@ class NovacoinComponent
             $currentTransactionIds = NvcTransactionObject::find()->select(['txid', 'address'])->asArray()->all();
             $keys = [];
             foreach ($currentTransactionIds as $currentTransactionId) {
-                $keys[] = \Yii::$app->novacoinComponent->generateTransactionKey($currentTransactionId['txid'], $currentTransactionId['address']);
+                $keys[] = \Yii::$app->novacoinComponent->generateTransactionKey(
+                    $currentTransactionId['txid'],
+                    $currentTransactionId['address']
+                );
             }
             $this->_tx_keys = $keys;
         }
@@ -156,7 +159,7 @@ class NovacoinComponent
         $keys = $this->getTxKeys();
         $key = $this->generateTransactionKey($txid, $address);
         $in_array = in_array($key, $keys);
-        static::Log("TX " . $txid . '--' . $address . ' duplicate test: ' . $in_array);
+        static::Log("TX ".$txid.'--'.$address.' duplicate test: '.$in_array);
 
         return $in_array;
     }
@@ -167,8 +170,22 @@ class NovacoinComponent
         $cache = \Yii::$app->cache;
         $cachedPrice = $cache->get($key);
         if (empty($cachedPrice)) {
-            $apiPrice = (double)ArrayHelper::getValue(Json::decode((new Client())->get('https://api.livecoin.net/exchange/ticker?currencyPair=NVC/USD')->send()->content), 'last');
-            $cachedPrice = $apiPrice;
+            $allDataBtc = ArrayHelper::getValue(
+                Json::decode((new Client())->get('https://www.cryptopia.co.nz/api/GetMarkets/BTC')->send()->content),
+                "Data"
+            );
+            $btcPrice = 0;
+            $usdPrice = 1;
+            foreach ($allDataBtc as $allDatum) {
+                if ($allDatum['Label'] == 'NVC/BTC') {
+                    $btcPrice = $allDatum['LastPrice'];
+                }
+                if ($allDatum['Label'] == 'TUSD/BTC') {
+                    $usdPrice = 1 / $allDatum['LastPrice'];
+                }
+            }
+
+            $cachedPrice = $btcPrice * $usdPrice;
             $cache->set($key, $apiPrice, 60);
         }
 
@@ -196,10 +213,12 @@ class NovacoinComponent
         $txFee = 0.000001 * $txSize;
         $delta = $sumOut - $sumIn;
         $change = $delta - $txFee;
-        $addresses[] = new AddressToSend([
-            'amount'  => $change,
-            'address' => $this->changeAddress,
-        ]);
+        $addresses[] = new AddressToSend(
+            [
+                'amount'  => $change,
+                'address' => $this->changeAddress,
+            ]
+        );
         foreach ($unspentTransactions as $unspentTransaction) {
             $transactionObject = new TransactionToSpent();
             $transactionObject->txid = $unspentTransaction->txid;
