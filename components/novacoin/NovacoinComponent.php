@@ -283,9 +283,16 @@ class NovacoinComponent
 
     public function getPosRate()
     {
-        $difficulty = $this->getRpcConnector()->getDifficulty();
-        $posDifficulty = (float)ArrayHelper::getValue($difficulty, 'proof-of-stake');
+        $key = 'cached.pos.rate';
+        $cached = \Yii::$app->cacheNovacoin->get($key, 0);
+        if (!$cached) {
+            $difficulty = $this->getRpcConnector()->getDifficulty();
+            $posDifficulty = (float)ArrayHelper::getValue($difficulty, 'proof-of-stake');
 
-        return max(0.01, round(pow(0.03125 / $posDifficulty, (1 / 3)), 2));
+            $cached = max(0.01, round(pow(0.03125 / $posDifficulty, (1 / 3)), 2));
+            \Yii::$app->cacheNovacoin->set($key, $cached);
+        }
+
+        return $cached;
     }
 }
