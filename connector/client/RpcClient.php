@@ -26,6 +26,7 @@ use liamwli\PHPBitcoin\BitCoin;
  * @method getblockbynumber($number)
  * @method getblock($hash)
  * @method getblockcount()
+ * @method getdifficulty()
  */
 class RpcClient extends BitCoin
 {

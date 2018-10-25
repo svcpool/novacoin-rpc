@@ -280,4 +280,12 @@ class NovacoinComponent
 
         return $hash;
     }
+
+    public function getPosRate()
+    {
+        $difficulty = $this->getRpcConnector()->getDifficulty();
+        $posDifficulty = (float)ArrayHelper::getValue($difficulty, 'proof-of-stake');
+
+        return max(0.01, round(pow(0.03125 / $posDifficulty, (1 / 3)), 2));
+    }
 }

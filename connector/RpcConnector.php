@@ -151,6 +151,11 @@ class RpcConnector
         return $this->_client->getblockcount();
     }
 
+    public function getDifficulty()
+    {
+        return $this->_client->getdifficulty();
+    }
+
     protected function prepareObject($object, array $vars)
     {
         $has = get_object_vars($object);
@@ -160,4 +165,5 @@ class RpcConnector
 
         return $object;
     }
+
 }
