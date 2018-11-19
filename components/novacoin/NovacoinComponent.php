@@ -62,6 +62,16 @@ class NovacoinComponent
         return $realBalance;
     }
 
+    public function getGasBalance($user_id, $calculated = false)
+    {
+        $helper = new UserCryptoBalanceHelper();
+        $helper->setUserId($user_id);
+
+        $realBalance = $helper->getGasBalance();
+
+        return $realBalance;
+    }
+
     public function getAddressBalance($address)
     {
         $client = new Client();
