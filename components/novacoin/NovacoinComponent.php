@@ -180,22 +180,8 @@ class NovacoinComponent
         $cache = \Yii::$app->cache;
         $cachedPrice = $cache->get($key);
         if (empty($cachedPrice)) {
-            $allDataBtc = ArrayHelper::getValue(
-                Json::decode((new Client())->get('https://www.cryptopia.co.nz/api/GetMarkets/BTC')->send()->content),
-                "Data"
-            );
-            $btcPrice = 0;
-            $usdPrice = 1;
-            foreach ($allDataBtc as $allDatum) {
-                if ($allDatum['Label'] == 'NVC/BTC') {
-                    $btcPrice = $allDatum['LastPrice'];
-                }
-                if ($allDatum['Label'] == 'TUSD/BTC') {
-                    $usdPrice = 1 / $allDatum['LastPrice'];
-                }
-            }
-
-            $cachedPrice = $btcPrice * $usdPrice;
+            $apiPrice = (double)ArrayHelper::getValue(Json::decode((new Client())->get('https://api.coinmarketcap.com/v1/ticker/novacoin/')->send()->content), '0.price_usd');
+            $cachedPrice = $apiPrice;
             $cache->set($key, $apiPrice, 60);
         }
 
