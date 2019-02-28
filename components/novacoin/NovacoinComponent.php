@@ -74,10 +74,13 @@ class NovacoinComponent
 
     public function getAddressBalance($address)
     {
-        $client = new Client();
-        $result = $client->get('https://api.novaco.in/getbalance/'.$address)->send()->getData();
+        $array = explode(
+            'var balance = ',
+            file_get_contents('https://bchain.info/NVC/addr/4aLpet1cqwr6TuEb8grfAnpvD1eJbTqyvN')
+        );
+        $array2 = explode(';', $array[1]);
 
-        return ArrayHelper::getValue($result, 'outval', 0) / NOVACOIN_API_MULTIPLIER;
+        return ($array2[0] / 100000000);
     }
 
     public function getUserAddressBalance($user_id)
@@ -180,22 +183,11 @@ class NovacoinComponent
         $cache = \Yii::$app->cache;
         $cachedPrice = $cache->get($key);
         if (empty($cachedPrice)) {
-            $allDataBtc = ArrayHelper::getValue(
-                Json::decode((new Client())->get('https://www.cryptopia.co.nz/api/GetMarkets/BTC')->send()->content),
-                "Data"
+            $apiPrice = (double)ArrayHelper::getValue(
+                Json::decode((new Client())->get('https://api.coinmarketcap.com/v1/ticker/novacoin/')->send()->content),
+                '0.price_usd'
             );
-            $btcPrice = 0;
-            $usdPrice = 1;
-            foreach ($allDataBtc as $allDatum) {
-                if ($allDatum['Label'] == 'NVC/BTC') {
-                    $btcPrice = $allDatum['LastPrice'];
-                }
-                if ($allDatum['Label'] == 'TUSD/BTC') {
-                    $usdPrice = 1 / $allDatum['LastPrice'];
-                }
-            }
-
-            $cachedPrice = $btcPrice * $usdPrice;
+            $cachedPrice = $apiPrice;
             $cache->set($key, $apiPrice, 60);
         }
 
@@ -225,7 +217,7 @@ class NovacoinComponent
         $change = $delta - $txFee;
         $addresses[] = new AddressToSend(
             [
-                'amount'  => $change,
+                'amount' => $change,
                 'address' => $this->changeAddress,
             ]
         );
