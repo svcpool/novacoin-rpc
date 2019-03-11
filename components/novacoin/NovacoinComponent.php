@@ -75,12 +75,15 @@ class NovacoinComponent
     public function getAddressBalance($address)
     {
         $array = explode(
-            'var balance = ',
-            file_get_contents('https://bchain.info/NVC/addr/4aLpet1cqwr6TuEb8grfAnpvD1eJbTqyvN')
+            '<div style="display:inline-block" itemprop="offers" itemscope itemtype="http://schema.org/Offer"><b>',
+            file_get_contents('https://bitinfocharts.com/ru/novacoin/address/'.$address)
         );
-        $array2 = explode(';', $array[1]);
+        $array2 = explode('<span class=\'muteds\'>', $array[1]);
+        $str = $array2[0];
+        $str = str_replace('.', '', $str);
+        $str = str_replace(',', '', $str);
 
-        return ($array2[0] / 100000000);
+        return floatval($str);
     }
 
     public function getUserAddressBalance($user_id)
