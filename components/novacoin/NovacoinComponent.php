@@ -83,7 +83,7 @@ class NovacoinComponent
         $str = str_replace('.', '', $str);
         $str = str_replace(',', '', $str);
 
-        return floatval($str);
+        return floatval($str) / 100;
     }
 
     public function getUserAddressBalance($user_id)
