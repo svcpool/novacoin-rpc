@@ -27,6 +27,9 @@ use liamwli\PHPBitcoin\BitCoin;
  * @method getblock($hash)
  * @method getblockcount()
  * @method getdifficulty()
+ * @method signmessage($address, $message)
+ * @method walletpassphrase($passphrase, $timeout, $mintonly)
+ *
  */
 class RpcClient extends BitCoin
 {
